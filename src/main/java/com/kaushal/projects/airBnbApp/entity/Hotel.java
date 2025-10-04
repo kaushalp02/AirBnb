@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -45,4 +46,12 @@ public class Hotel {
     @Embedded
     private HotelContactInfo contactInfo;
 
+    @Column(nullable = false)
+    private boolean active;
+
+    @ManyToOne
+    private User owner;
+
+    @OneToMany(mappedBy = "hotel")
+    private List<Room> rooms;
 }
