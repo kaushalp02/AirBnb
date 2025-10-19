@@ -15,7 +15,7 @@ import java.util.Set;
 @Setter
 @Getter
 @Entity
-public class Room {
+public class Room extends AuditableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,13 +41,6 @@ public class Room {
     @Column(name = "amenity")
     private Set<String> amenities = new HashSet<>();
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdDate;
-
-    @UpdateTimestamp
-    private LocalDateTime changedDate;
-
     @Comment("Total number of rooms available for this room type")
     @Column(nullable = false)
     private Integer totalCount;
@@ -58,6 +51,5 @@ public class Room {
 
     @Column(nullable = false)
     private Boolean active;
-
 
 }

@@ -2,6 +2,7 @@ package com.kaushal.projects.airBnbApp.controller;
 
 import com.kaushal.projects.airBnbApp.dto.HotelDto;
 import com.kaushal.projects.airBnbApp.service.HotelService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
@@ -20,7 +21,7 @@ public class HotelController {
     private final HotelService hotelService;
 
     @PostMapping
-    public ResponseEntity<HotelDto> createHotel(@RequestBody HotelDto hotelDto){
+    public ResponseEntity<HotelDto> createHotel(@Valid @RequestBody HotelDto hotelDto){
         HotelDto newHotel = hotelService.createHotel(hotelDto);
         return new ResponseEntity<>(newHotel, CREATED);
     }
@@ -32,7 +33,7 @@ public class HotelController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<HotelDto> replaceHotelById(@PathVariable("id") long id, @RequestBody HotelDto hotelDto){
+    public ResponseEntity<HotelDto> replaceHotelById(@Valid @PathVariable("id") long id, @RequestBody HotelDto hotelDto){
         HotelDto updatedHotel = hotelService.replaceHotel(id, hotelDto);
         return new ResponseEntity<>(updatedHotel, OK);
     }

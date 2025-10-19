@@ -14,7 +14,7 @@ import java.util.Set;
 @Setter
 @Getter
 @Entity
-public class Booking {
+public class Booking extends AuditableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,13 +40,6 @@ public class Booking {
 
     @Column(nullable = false)
     private LocalDate checkoutDate;
-
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdDate;
-
-    @UpdateTimestamp
-    private LocalDateTime changedDate;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payment_id")

@@ -1,11 +1,13 @@
 package com.kaushal.projects.airBnbApp.advice;
 
+import com.kaushal.projects.airBnbApp.exceptions.ResourceInUseException;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,6 +24,17 @@ public class GlobalExceptionHandler {
                 .detailedMessage(exception.getMessage()).build();
 
         return new ResponseEntity<>(new ApiResponse<>(apiError),HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ResourceInUseException.class)
+    public ResponseEntity<ApiResponse<?>> cannotDeleteError (ResourceInUseException exception)
+    {
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.CONFLICT)
+                .message("Resource is used somewhere as reference.")
+                .detailedMessage(exception.getMessage()).build();
+
+        return new ResponseEntity<>(new ApiResponse<>(apiError), HttpStatus.CONFLICT);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

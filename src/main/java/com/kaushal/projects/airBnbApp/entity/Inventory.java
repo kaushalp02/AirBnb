@@ -1,8 +1,7 @@
 package com.kaushal.projects.airBnbApp.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.hibernate.annotations.Comment;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -14,10 +13,13 @@ import java.time.LocalDateTime;
 @Setter
 @Getter
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(uniqueConstraints = @UniqueConstraint(
             name = "unique_hotel_room_date",
             columnNames = {"hotel_id","room_id","date"}))
-public class Inventory {
+public class Inventory extends AuditableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -53,11 +55,5 @@ public class Inventory {
     @Column(nullable = false)
     private Boolean closed;
 
-    @CreationTimestamp
-    @Column(updatable = false)
-    private LocalDateTime createdDate;
-
-    @UpdateTimestamp
-    private LocalDateTime changedDate;
 }
 
