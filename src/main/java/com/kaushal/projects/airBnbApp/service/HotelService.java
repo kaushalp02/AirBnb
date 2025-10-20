@@ -1,7 +1,7 @@
 package com.kaushal.projects.airBnbApp.service;
 
 import com.kaushal.projects.airBnbApp.dto.HotelDto;
-import com.kaushal.projects.airBnbApp.entity.Hotel;
+import com.kaushal.projects.airBnbApp.dto.HotelInfoDto;
 
 public interface HotelService {
 
@@ -14,4 +14,6 @@ public interface HotelService {
     void deleteHotelById(long id);
 
     void activateHotel(long id);
+
+    HotelInfoDto getHoteInfoById(Long hotelId);
 }
