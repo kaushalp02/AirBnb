@@ -3,7 +3,9 @@ package com.kaushal.projects.airBnbApp.service;
 import com.kaushal.projects.airBnbApp.dto.RoomDto;
 import com.kaushal.projects.airBnbApp.entity.Hotel;
 import com.kaushal.projects.airBnbApp.entity.Room;
+import com.kaushal.projects.airBnbApp.entity.User;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceNotFoundException;
+import com.kaushal.projects.airBnbApp.exceptions.UnAuthorizedException;
 import com.kaushal.projects.airBnbApp.repository.HotelRepository;
 import com.kaushal.projects.airBnbApp.repository.InventoryRepository;
 import com.kaushal.projects.airBnbApp.repository.RoomRepository;
@@ -11,6 +13,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -33,6 +36,12 @@ public class RoomServiceImpl implements RoomService{
         Hotel hotel = hotelRepository
                 .findById(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel Not Found with id : "+hotelId+" (While creating room for the hotel.)"));
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(hotel.getOwner()))
+        {
+            throw new UnAuthorizedException("Only Hotel owner is allowed to create the rooms.");
+        }
 
         Room room = modelMapper.map(roomDto, Room.class);
 
@@ -90,7 +99,11 @@ public class RoomServiceImpl implements RoomService{
                 .findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room Not Found with id : "+ id + "(While deleting a room)"));
 
-
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(room.getHotel().getOwner()))
+        {
+            throw new UnAuthorizedException("Only owner can delete the room information");
+        }
         //Delete the inventory for the future for this room
         inventoryService.deleteFutureInventories(room);
 

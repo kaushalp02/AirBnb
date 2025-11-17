@@ -5,13 +5,16 @@ import com.kaushal.projects.airBnbApp.dto.HotelInfoDto;
 import com.kaushal.projects.airBnbApp.dto.RoomDto;
 import com.kaushal.projects.airBnbApp.entity.Hotel;
 import com.kaushal.projects.airBnbApp.entity.Room;
+import com.kaushal.projects.airBnbApp.entity.User;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceInUseException;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceNotFoundException;
+import com.kaushal.projects.airBnbApp.exceptions.UnAuthorizedException;
 import com.kaushal.projects.airBnbApp.repository.HotelRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -31,6 +34,8 @@ public class HotelServiceImpl implements HotelService{
 
         Hotel hotel = modelMapper.map(hotelDto, Hotel.class);
         hotel.setActive(false);
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        hotel.setOwner(user);
         hotel = hotelRepository.save(hotel);
 
         log.info("Hotel created with id : {}", hotel.getId());
@@ -46,9 +51,17 @@ public class HotelServiceImpl implements HotelService{
 
     @Override
     public HotelDto replaceHotel(long id, HotelDto hotelDto) {
+
         log.info("Replacing Hotel with new information (Hotel id : {})",id);
         Hotel hotel = hotelRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel Not Found with id : "+id+" While replacing hotel information."));
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(hotel.getOwner()))
+        {
+            throw new UnAuthorizedException("Only owner can update the hotel information");
+        }
+
         modelMapper.map(hotelDto, hotel);
         hotel.setId(id);
         hotel = hotelRepository.save(hotel);
@@ -68,6 +81,12 @@ public class HotelServiceImpl implements HotelService{
         {
             log.info("Cannot delete hotel since there are rooms associated with this hotel.");
             throw new ResourceInUseException("Cannot Delete Hotel Since there are rooms associated with it. Kindly delete all the rooms in order to delete this hotel.");
+        }
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!user.equals(hotel.getOwner()))
+        {
+            throw new UnAuthorizedException("Only owner can delete the hotel information");
         }
 
         hotelRepository.deleteById(id);

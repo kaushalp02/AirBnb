@@ -42,7 +42,7 @@ public class Hotel extends AuditableEntity{
     @Column(nullable = false)
     private boolean active;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private User owner;
 
     @OneToMany(mappedBy = "hotel")
