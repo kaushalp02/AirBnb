@@ -19,6 +19,8 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 import java.util.List;
 
+import static com.kaushal.projects.airBnbApp.util.AppUtils.getCurrentUser;
+
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,7 +39,7 @@ public class RoomServiceImpl implements RoomService{
                 .findById(hotelId)
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel Not Found with id : "+hotelId+" (While creating room for the hotel.)"));
 
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        User user = getCurrentUser();
         if(!user.equals(hotel.getOwner()))
         {
             throw new UnAuthorizedException("Only Hotel owner is allowed to create the rooms.");
@@ -111,5 +113,32 @@ public class RoomServiceImpl implements RoomService{
         log.info("Successfully delete the room : {}", id);
 
 
+    }
+
+    @Override
+    @Transactional
+    public RoomDto updateRoomById(long hotelId, long roomId, RoomDto roomDto) {
+
+        Hotel hotel = hotelRepository
+                .findById(hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("While Updating the room details, Hotel Not Found with id : "+hotelId));
+
+        User user = getCurrentUser();
+        if(!user.equals(hotel.getOwner()))
+        {
+            throw new UnAuthorizedException("Only Hotel owner is allowed to update the rooms.");
+        }
+
+        Room room = roomRepository
+                .findById(roomId)
+                .orElseThrow(() -> new ResourceNotFoundException("While trying to update the room, Room Not Found with id : "+roomId));
+
+        //copy room dto details to the room
+        modelMapper.map(roomDto, room);
+        room.setId(roomId);
+
+        roomRepository.save(room);
+
+        return modelMapper.map(room, RoomDto.class);
     }
 }

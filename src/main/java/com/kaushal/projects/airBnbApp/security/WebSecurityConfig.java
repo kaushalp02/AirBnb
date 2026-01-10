@@ -41,6 +41,22 @@ public class WebSecurityConfig {
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
+    private static final String[] PUBLIC_UNSECURED_URLS = {
+            // --- SWAGGER/OPENAPI ---
+            "/swagger-ui.html",
+            "/swagger-ui/**",
+            "/v3/api-docs/**",
+
+            // --- ACTUATOR ---
+            "/actuator/**",
+
+            // --- AUTHENTICATION/REGISTRATION Endpoints ---
+            // REPLACE THESE with the exact paths of your AuthController methods (e.g., /auth/login)
+            "/auth/**",
+            "/public/**"
+    };
+
+
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception{
         httpSecurity
@@ -49,9 +65,9 @@ public class WebSecurityConfig {
                         sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
                         auth
+                                .requestMatchers(PUBLIC_UNSECURED_URLS).permitAll()
                                 .requestMatchers("/admin/**").hasRole(HOTEL_MANAGER.name())
-                                .requestMatchers("/bookings/**").authenticated()
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .exceptionHandling(exHandlingConfig -> exHandlingConfig.accessDeniedHandler(customAccessDeniedHandler));

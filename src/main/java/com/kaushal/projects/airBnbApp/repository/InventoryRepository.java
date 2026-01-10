@@ -12,7 +12,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -176,4 +178,49 @@ public interface InventoryRepository extends JpaRepository<Inventory, Long> {
             @Param("endDate") LocalDate endDate,
             @Param("numberOfRooms") int numberOfRooms
     );
+
+    List<Inventory> findByRoomOrderByDate(Room room);
+
+    //query for locking before updating the inventory
+    @Query("""
+        SELECT i
+        FROM Inventory i
+        WHERE
+            i.room.id = :roomId
+            AND i.date BETWEEN :startDate AND :endDate
+        """)
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    List<Inventory> lockInventoryToBeUpdated(
+            @Param("roomId") Long roomId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
+    @Modifying
+    @Transactional
+    @Query("""
+        UPDATE Inventory i
+        SET
+            i.price = CASE
+                         WHEN :price IS NOT NULL AND :price > 0 THEN :price
+                         ELSE i.price
+                       END,
+            i.surgeFactor = CASE
+                              WHEN :surgeFactor IS NOT NULL AND :surgeFactor > 0 THEN :surgeFactor
+                              ELSE i.surgeFactor
+                            END,
+            i.closed = :closed
+        WHERE
+            i.room.id = :roomId
+            AND i.date BETWEEN :startDate AND :endDate
+        """)
+    void updateInventory(
+            @Param("roomId") Long roomId,
+            @Param("price") BigDecimal price,
+            @Param("surgeFactor") BigDecimal surgeFactor,
+            @Param("closed") Boolean closed,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
+    );
+
 }

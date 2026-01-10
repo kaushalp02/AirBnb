@@ -13,8 +13,7 @@ public class GlobalResponseHandler implements ResponseBodyAdvice<Object> {
 
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return false;
-        //return true ;
+        return true ;
     }
 
     @Override

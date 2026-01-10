@@ -3,6 +3,7 @@ package com.kaushal.projects.airBnbApp.service;
 import com.kaushal.projects.airBnbApp.dto.BookingDto;
 import com.kaushal.projects.airBnbApp.dto.BookingRequestDto;
 import com.kaushal.projects.airBnbApp.dto.GuestDto;
+import com.kaushal.projects.airBnbApp.dto.HotelReportDto;
 import com.kaushal.projects.airBnbApp.entity.*;
 import com.kaushal.projects.airBnbApp.entity.enums.BookingStatus;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceNotFoundException;
@@ -18,15 +19,21 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Value;
+
+import static com.kaushal.projects.airBnbApp.util.AppUtils.getCurrentUser;
 
 @Service
 @Slf4j
@@ -266,12 +273,70 @@ public class BookingServiceImpl implements BookingService {
         return booking.getBookingStatus().name();
     }
 
-    public Boolean hasBookingExpired(Booking booking) {
-        return booking.getCreatedDate().plusMinutes(10).isBefore(LocalDateTime.now());
+    @Override
+    public List<BookingDto> getBookingsByHotel(Long hotelId) {
+        Hotel hotel = hotelRepository.findById(hotelId)
+                .orElseThrow(() -> new ResourceNotFoundException("No Hotel Found with id "+hotelId));
+
+        User user = getCurrentUser();
+
+        if (!user.equals(hotel.getOwner()))
+        {
+            throw new AccessDeniedException("Only hotel owner can request for the hotel rooms");
+        }
+        log.info("finding all the booking for the hotel with id {}",hotelId);
+        List<Booking> bookings = bookingRepository.findByHotel(hotel);
+
+        return bookings.stream()
+                .map((element) -> modelMapper.map(element, BookingDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public HotelReportDto getHotelReport(Long id, LocalDate startDate, LocalDate endDate) {
+        Hotel hotel = hotelRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No Hotel Found with id "+id));
+
+        User user = getCurrentUser();
+
+        if (!user.equals(hotel.getOwner()))
+        {
+            throw new AccessDeniedException("Only hotel owner can request for the hotel rooms");
+        }
+
+        log.info("Generating report for hotel with id {} starting from : {} to {}", id, startDate, endDate);
+
+        LocalDateTime startDateTime = startDate.atStartOfDay();
+        LocalDateTime endDateTime = endDate.atTime(LocalTime.MAX);
+        List<Booking> bookings = bookingRepository.findByHotelIdAndCreatedDateBetween(id,startDateTime, endDateTime);
+
+        long totalConfirmBooking = bookings.stream()
+                .filter(booking -> booking.getBookingStatus() == BookingStatus.CONFIRMED)
+                .count();
+
+        BigDecimal totalRevenue = bookings.stream()
+                .filter(booking -> booking.getBookingStatus() == BookingStatus.CONFIRMED)
+                .map(Booking::getAmount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal avgRevenue = totalConfirmBooking == 0 ? BigDecimal.ZERO :
+                totalRevenue.divide(BigDecimal.valueOf(totalConfirmBooking), RoundingMode.HALF_UP);
+
+        return new HotelReportDto(totalConfirmBooking, totalRevenue, avgRevenue);
+    }
+
+    @Override
+    public List<BookingDto> gerUserBookings() {
+        User user = getCurrentUser();
+
+        log.info("Getting all the bookings for the user");
+        return bookingRepository.findByUser(user).stream()
+                .map((element) -> modelMapper.map(element, BookingDto.class)).collect(Collectors.toList());
 
     }
 
-    public User getCurrentUser() {
-        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public Boolean hasBookingExpired(Booking booking) {
+        return booking.getCreatedDate().plusMinutes(10).isBefore(LocalDateTime.now());
+
     }
 }

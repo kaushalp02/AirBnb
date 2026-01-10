@@ -10,11 +10,10 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserDto {
+public class UserUpdateDto {
 
     private String name;
-    private String email;
-    private Long id;
-    private LocalDate dateOfBirth;
     private Gender gender;
+    private LocalDate dateOfBirth;
+
 }
