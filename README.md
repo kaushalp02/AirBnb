@@ -26,4 +26,19 @@ This is a robust, production-grade backend for hotel booking platform built with
 
 ## 📦 Modules and APIs
 
+##### - Authentication & Authorization 
+`POST /auth/signup` - To sign up using email id and password, also handled necessary input validations    
+`POST /auth/login` - To login using email id and password  
+`POST /auth/refresh` - To get the access token using your refresh token    
+`GET /oauth2/authorization/google` - Login/Sign Up using google 
 
+##### - Admin Hotel 
+`POST /admin/hotels` - Create new Hotel   
+`GET /admin/hotels/{hotelId}` - Get Hotel   
+`PUT /admin/hotels/{hotelId}` - Update Hotel   
+`DELETE /admin/hotels/{hotelId}` - Delete Hotel  
+`PATCH /admin/hotels/{hotelId}` - To activate the Hotel   
+`GET /admin/hotels/` - Get all the hotels of the logged in admin
+
+##### - Health Check
+`GET /` - When the application is deployed you can call this end point to check if the application is running or not
