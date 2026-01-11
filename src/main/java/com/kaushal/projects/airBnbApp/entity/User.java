@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Getter
 @Entity
 @Table(name = "user_master")
-public class User implements UserDetails {
+public class User extends AuditableEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

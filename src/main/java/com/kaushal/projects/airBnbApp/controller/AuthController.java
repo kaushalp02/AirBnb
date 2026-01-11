@@ -8,6 +8,7 @@ import com.kaushal.projects.airBnbApp.security.AuthService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public ResponseEntity<UserDto> signUp(@RequestBody SignUpRequestDto signUpRequestDto){
+    public ResponseEntity<UserDto> signUp(@RequestBody @Valid SignUpRequestDto signUpRequestDto){
         return new ResponseEntity<>(authService.signUp(signUpRequestDto), HttpStatus.CREATED);
     }
 

@@ -1,18 +1,8 @@
 package com.kaushal.projects.airBnbApp.security;
-
-import com.fasterxml.jackson.core.ObjectCodec;
-import com.kaushal.projects.airBnbApp.advice.ApiError;
-import com.kaushal.projects.airBnbApp.advice.ApiResponse;
 import com.kaushal.projects.airBnbApp.advice.CustomAccessDeniedHandler;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -23,13 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.servlet.HandlerExceptionResolver;
-
-import java.nio.file.AccessDeniedException;
-
 import static com.kaushal.projects.airBnbApp.entity.enums.Role.HOTEL_MANAGER;
 
 @Configuration
@@ -53,7 +37,12 @@ public class WebSecurityConfig {
             // --- AUTHENTICATION/REGISTRATION Endpoints ---
             // REPLACE THESE with the exact paths of your AuthController methods (e.g., /auth/login)
             "/auth/**",
-            "/public/**"
+            "/public/**",
+
+            //Health Check API
+            "/",
+            //Error path
+            "/error"
     };
 
 

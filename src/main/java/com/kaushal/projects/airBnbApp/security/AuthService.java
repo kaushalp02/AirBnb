@@ -7,7 +7,9 @@ import com.kaushal.projects.airBnbApp.entity.User;
 import com.kaushal.projects.airBnbApp.entity.enums.Role;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceNotFoundException;
 import com.kaushal.projects.airBnbApp.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,6 +21,7 @@ import java.util.Set;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AuthService {
 
     private final UserRepository userRepository;
@@ -27,12 +30,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    @Transactional
     public UserDto signUp(SignUpRequestDto signUpRequestDto){
 
         User user = userRepository.findByEmail(signUpRequestDto.getEmail()).orElse(null);
 
         if (user != null)
         {
+            log.error("user already exists with the same email");
             throw new RuntimeException("User with email already exists : "+signUpRequestDto.getEmail());
         }
 
@@ -44,6 +49,7 @@ public class AuthService {
         //Encrypt the password and set it in the new user
         newUser.setPassword(passwordEncoder.encode(signUpRequestDto.getPassword()));
         userRepository.save(newUser);
+        log.info("Successfully Created New User");
         return modelMapper.map(newUser, UserDto.class);
     }
 

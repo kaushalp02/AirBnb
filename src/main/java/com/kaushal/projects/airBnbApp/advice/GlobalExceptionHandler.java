@@ -3,6 +3,7 @@ package com.kaushal.projects.airBnbApp.advice;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceInUseException;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceNotFoundException;
 import io.jsonwebtoken.JwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Slf4j
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -94,5 +96,16 @@ public class GlobalExceptionHandler {
                 .build();
 
         return new ResponseEntity<>(new ApiResponse<>(apiError), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<?>> handleInternalErrors(Exception exception) {
+        log.error("CRITICAL UNHANDLED ERROR: ", exception);
+        ApiError apiError = ApiError.builder()
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .message("An internal server error occurred")
+                .detailedMessage(exception.toString())
+                .build();
+        return new ResponseEntity<>(new ApiResponse<>(apiError), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
