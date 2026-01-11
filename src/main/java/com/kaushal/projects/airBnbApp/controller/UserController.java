@@ -2,9 +2,11 @@ package com.kaushal.projects.airBnbApp.controller;
 
 import com.kaushal.projects.airBnbApp.dto.BookingDto;
 import com.kaushal.projects.airBnbApp.dto.UserDto;
+import com.kaushal.projects.airBnbApp.dto.UserRoleUpdateDto;
 import com.kaushal.projects.airBnbApp.dto.UserUpdateDto;
 import com.kaushal.projects.airBnbApp.service.BookingService;
 import com.kaushal.projects.airBnbApp.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +36,15 @@ public class UserController {
     public ResponseEntity<UserDto> getUserInfo()
     {
         return ResponseEntity.ok(userService.getUserInfo());
+    }
+
+    @PutMapping("/{userId}/role")
+    public ResponseEntity<Void> updateUserRole(@Valid
+            @PathVariable(name = "userId") Long userId,
+            @RequestBody UserRoleUpdateDto roleUpdateDto) {
+
+        userService.updateUserRole(userId, roleUpdateDto);
+        return ResponseEntity.noContent().build();
     }
 
 }

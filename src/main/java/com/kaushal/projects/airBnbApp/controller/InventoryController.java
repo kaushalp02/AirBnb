@@ -17,13 +17,13 @@ public class InventoryController {
     private final InventoryService inventoryService;
 
     @GetMapping("/rooms/{roomId}")
-    public ResponseEntity<List<InventoryDto>> getInventoryByRoom(@PathVariable long roomId)
+    public ResponseEntity<List<InventoryDto>> getInventoryByRoom(@PathVariable("roomId") long roomId)
     {
         return ResponseEntity.ok(inventoryService.getInventoryByRoom(roomId));
     }
 
     @PatchMapping("/rooms/{roomId}")
-    public ResponseEntity<Void> updateInventory(@PathVariable long roomId,
+    public ResponseEntity<Void> updateInventory(@PathVariable(name = "roomId") long roomId,
                                                 @RequestBody UpdateInventoryRequestDto inventoryRequestDto)
     {
         inventoryService.updateInventory(roomId, inventoryRequestDto);

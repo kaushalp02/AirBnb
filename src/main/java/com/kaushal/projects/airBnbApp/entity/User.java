@@ -3,8 +3,7 @@ package com.kaushal.projects.airBnbApp.entity;
 import com.kaushal.projects.airBnbApp.entity.enums.Gender;
 import com.kaushal.projects.airBnbApp.entity.enums.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,10 +14,13 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Builder
 @Setter
 @Getter
 @Entity
 @Table(name = "user_master")
+@NoArgsConstructor
+@AllArgsConstructor
 public class User extends AuditableEntity implements UserDetails {
 
     @Id

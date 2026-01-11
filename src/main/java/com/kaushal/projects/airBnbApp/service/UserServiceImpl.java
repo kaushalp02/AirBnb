@@ -1,9 +1,11 @@
 package com.kaushal.projects.airBnbApp.service;
 
 import com.kaushal.projects.airBnbApp.dto.UserDto;
+import com.kaushal.projects.airBnbApp.dto.UserRoleUpdateDto;
 import com.kaushal.projects.airBnbApp.dto.UserUpdateDto;
 import com.kaushal.projects.airBnbApp.entity.User;
 import com.kaushal.projects.airBnbApp.exceptions.ResourceNotFoundException;
+import com.kaushal.projects.airBnbApp.exceptions.UnAuthorizedException;
 import com.kaushal.projects.airBnbApp.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -52,5 +54,20 @@ public class UserServiceImpl implements UserService, UserDetailsService
     @Override
     public UserDto getUserInfo() {
         return modelMapper.map(getCurrentUser(), UserDto.class);
+    }
+
+    @Override
+    @Transactional
+    public void updateUserRole(Long userId, UserRoleUpdateDto roleUpdateDto) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id : "+userId));
+        User loggedInUser = getCurrentUser();
+
+        if (!user.equals(loggedInUser))
+            throw new UnAuthorizedException("You are not authorized to change other users roles");
+
+        user.setRoles(roleUpdateDto.getRoles());
+
+        userRepository.save(user);
     }
 }

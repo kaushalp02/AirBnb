@@ -24,6 +24,7 @@ public class WebSecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final OAuth2SuccessHandler oAuth2SuccessHandler;
 
     private static final String[] PUBLIC_UNSECURED_URLS = {
             // --- SWAGGER/OPENAPI ---
@@ -42,7 +43,10 @@ public class WebSecurityConfig {
             //Health Check API
             "/",
             //Error path
-            "/error"
+            "/error",
+
+            //Webhooks
+            "/webhook/**"
     };
 
 
@@ -59,6 +63,8 @@ public class WebSecurityConfig {
                                 .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2config -> oauth2config.failureUrl("http://localhost:8080/error")
+                        .successHandler(oAuth2SuccessHandler))
                 .exceptionHandling(exHandlingConfig -> exHandlingConfig.accessDeniedHandler(customAccessDeniedHandler));
         return httpSecurity.build();
     }

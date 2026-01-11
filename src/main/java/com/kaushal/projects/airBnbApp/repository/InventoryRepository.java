@@ -21,7 +21,9 @@ import java.util.List;
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, Long> {
 
-    Void deleteByDateAfterAndRoom(LocalDate date, Room room);
+    @Modifying
+    @Transactional
+    int deleteByDateAfterAndRoom(LocalDate date, Room room);
 
     @Query(value = "SELECT h.* FROM hotel h\n" +
             "        JOIN room r ON h.id = r.hotel_id\n" +

@@ -5,6 +5,7 @@ import com.kaushal.projects.airBnbApp.entity.Hotel;
 import com.kaushal.projects.airBnbApp.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ public interface HotelRepository extends JpaRepository<Hotel, Long> {
     @Query("SELECT DISTINCT h FROM Hotel h" +
             " JOIN FETCH h.rooms r" +
           " WHERE h.id = :hotelId")
-    Optional<Hotel> hotelWithRoomsById(Long hotelId);
+    Optional<Hotel> hotelWithRoomsById(@Param("hotelId") Long hotelId);
 
     List<Hotel> findByOwner(User user);
 }

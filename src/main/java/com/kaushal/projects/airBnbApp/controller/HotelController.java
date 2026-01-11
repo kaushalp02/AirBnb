@@ -74,8 +74,8 @@ public class HotelController {
     //report dashboard api
     @GetMapping("/{id}/reports")
     public ResponseEntity<HotelReportDto> getHotelReport(@PathVariable("id") Long id,
-                                                         @RequestParam(required = false)LocalDate startDate,
-                                                         @RequestParam(required = false)LocalDate endDate)
+                                                         @RequestParam(name = "startDate", required = false)LocalDate startDate,
+                                                         @RequestParam(name = "endDate",required = false)LocalDate endDate)
     {
         if (startDate == null) startDate = LocalDate.now().minusMonths(1);
         if (endDate == null) endDate = LocalDate.now();
